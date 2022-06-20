@@ -1,46 +1,58 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import HomeView from '../views/HomeView.vue'
-import modal from '../page/modal/index.vue';
-import table from '../page/table/index.vue';
-import modalTable from '../page/modal-table';
+import Layout from '@/layout';
+import testRouter from '@/router/modules/test';
+
+console.log(testRouter);
 
 Vue.use(VueRouter)
 
-const routes = [
+export const constantRoutes = [
   {
-    path: '/home',
-    name: 'home',
-    component: HomeView,
-    children: [
-      { path: '/home/modal', name: 'pageModal', component: modal },
-      { path: '/home/table', name: 'pageTable', component: table },
-      { path: '/home/modal-table', name: 'modalTable', component: modalTable }
-    ],
+    path: '/login',
+    redirect: '',
+    component: () => import('@/views/login/index'),
+    hidden: true
   },
   {
-    path: '/about',
-    name: 'about',
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
-    component: () => import(/* webpackChunkName: "about" */ '../views/AboutView.vue')
-  }
+    path: '/',
+    component: Layout,
+    redirect: '/dashboard',
+    children: [
+      {
+        path: 'dashboard',
+        component: () => import('@/views/dashboard/index'),
+        name: 'Dashboard',
+        meta: { title: 'Dashboard', icon: 'dashboard', affix: true }
+      }
+    ]
+  }, {
+    path: '/documentation',
+    component: Layout,
+    children: [
+      {
+        path: 'index',
+        component: () => import('@/views/documentation/index'),
+        name: 'Documentation',
+        meta: { title: 'Documentation', icon: 'documentation', affix: true }
+      }
+    ],
+
+  },
+  testRouter
+]
+
+console.log(constantRoutes);
+
+export const asyncRoutes = [
+  { path: '*', redirect: '/404', hidden: true }
 ]
 
 const router = new VueRouter({
-  mode: 'history',
+  mode: 'hash',
   base: process.env.BASE_URL,
-  routes
+  routes: constantRoutes
 })
 
-router.beforeEach((to, from, next) => {
-  console.log(to, from);
-  if (to.matched.length === 0) {  //如果未匹配到路由
-    from.name ? next({ name: from.name }) : next('/');   //如果上级也未匹配到路由则跳转登录页面，如果上级能匹配到则转上级路由
-  } else {
-    next();    //如果匹配到正确跳转
-  }
-});
 
 export default router
